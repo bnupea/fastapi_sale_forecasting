@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sales Forecasting</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-lg p-6 max-w-md w-full">
+    <h1 class="text-2xl font-bold text-center mb-4">Sales Forecasting</h1>
+    <form id="forecast-form" class="space-y-4">
+      <div>
+        <label for="tv" class="block text-sm font-medium">TV Budget ($)</label>
+        <input
+          type="number"
+          step="0.01"
+          id="tv"
+          required
+          class="mt-1 block w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+      </div>
+      <div>
+        <label for="radio" class="block text-sm font-medium">Radio Budget ($)</label>
+        <input
+          type="number"
+          step="0.01"
+          id="radio"
+          required
+          class="mt-1 block w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+      </div>
+      <div>
+        <label for="newspaper" class="block text-sm font-medium">Newspaper Budget ($)</label>
+        <input
+          type="number"
+          step="0.01"
+          id="newspaper"
+          required
+          class="mt-1 block w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+      </div>
+      <button
+        type="submit"
+        class="w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition"
+      >
+        Predict
+      </button>
+    </form>
+    <div id="result" class="mt-6 text-center text-xl font-semibold text-gray-800"></div>
+  </div>
+
+  <script>
+    document.getElementById('forecast-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const tv = parseFloat(document.getElementById('tv').value);
+      const radio = parseFloat(document.getElementById('radio').value);
+      const newspaper = parseFloat(document.getElementById('newspaper').value);
+      const resultDiv = document.getElementById('result');
+      resultDiv.textContent = 'Predicting...';
+      try {
+        const response = await fetch('http://127.0.0.1:8000/predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ TV: tv, Radio: radio, Newspaper: newspaper })
+        });
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(errorText);
+        }
+        const data = await response.json();
+        resultDiv.textContent = `🧮 Predicted Sales: ${data.predicted_sales.toFixed(2)}`;
+      } catch (err) {
+        resultDiv.textContent = 'Error: ' + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
